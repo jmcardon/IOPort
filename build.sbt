@@ -12,7 +12,9 @@ lazy val root = (project in file("."))
       "org.specs2" %% "specs2-matcher-extra" % "4.0.0" % "test",
       "org.http4s" %% "http4s-blaze-server" % Http4sVersion,
       "org.http4s" %% "http4s-circe" % Http4sVersion,
-      "org.http4s" %% "http4s-dsl" % Http4sVersion
+      "org.http4s" %% "http4s-dsl" % Http4sVersion,
+      "io.gatling.highcharts" % "gatling-charts-highcharts" % "2.3.0" % "test",
+      "io.gatling" % "gatling-test-framework" % "2.3.0" % "test"
     ),
     scalacOptions := Seq(
       "-unchecked",
@@ -28,4 +30,4 @@ lazy val root = (project in file("."))
       "-language:higherKinds",
       "-language:implicitConversions"
     )
-  )
+  ).enablePlugins(GatlingPlugin)
