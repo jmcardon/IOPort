@@ -28,6 +28,20 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-literal" % circeVersion,
-      "io.monix" %% "monix" % monixVersion,
+      "io.monix" %% "monix" % monixVersion
+    ),
+    scalacOptions := Seq(
+      "-unchecked",
+      "-feature",
+      "-deprecation",
+      "-encoding",
+      "utf8",
+      "-Ywarn-adapted-args",
+      "-Ywarn-inaccessible",
+      "-Ywarn-unused:imports",
+      "-Ywarn-nullary-override",
+      "-Ypartial-unification",
+      "-language:higherKinds",
+      "-language:implicitConversions"
     )
   )
