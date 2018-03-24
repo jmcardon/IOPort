@@ -14,11 +14,9 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.4",
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
-      "org.typelevel" %% "cats-core" % "0.9.0",
+      "org.typelevel" %% "cats-core" % catsVersion,
       "org.specs2" %% "specs2-core" % "4.0.0" % "test",
       "org.specs2" %% "specs2-matcher-extra" % "4.0.0" % "test",
-      "org.typelevel" %% "cats-effect" % catsEffectVersion,
-      "org.typelevel" %% "cats-core" % "0.9.0",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
