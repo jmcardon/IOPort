@@ -1,5 +1,6 @@
 
 
+
 val http4sVersion = "0.18.3"
 val circeVersion = "0.9.2"
 val catsEffectVersion = "0.10"
