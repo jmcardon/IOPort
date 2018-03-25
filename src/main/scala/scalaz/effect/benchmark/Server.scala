@@ -2,18 +2,21 @@ package scalaz.effect.benchmark
 
 import cats.effect.Effect
 import fs2.StreamApp
+import monix.eval.Task
+import monix.eval.instances._
+import monix.execution.Scheduler.Implicits.global
 import org.http4s.client.blaze.Http1Client
 import org.http4s.server.blaze.BlazeBuilder
 import scalaz.effect.IO
 import scalaz.effect.benchmark.module.ApiModule
 
-import scala.concurrent.ExecutionContext.Implicits.global
+object IOServer extends Server[IO]
 
-object Main extends Server[IO](8081)
+object CIOServer extends Server[cats.effect.IO]
 
-object CatsMain extends Server[cats.effect.IO](8080)
+object TaskServer extends Server[Task]
 
-class Server[F[_]: Effect](port: Int) extends StreamApp[F] {
+class Server[F[_]: Effect] extends StreamApp[F] {
 
   override def stream(
       args: List[String],
@@ -22,7 +25,7 @@ class Server[F[_]: Effect](port: Int) extends StreamApp[F] {
       client <- Http1Client.stream[F]()
       ctx = new ApiModule[F]
       init <- BlazeBuilder[F]
-        .bindHttp(port, "localhost")
+        .bindHttp(8080, "localhost")
         .mountService(ctx.api)
         .serve
     } yield init
