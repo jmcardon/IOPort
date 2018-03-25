@@ -14,10 +14,7 @@ class LTextService[F[_]](client: Client[F])(implicit F: Effect[F]) {
     Http1Client[F]() >>= (_.get(url)(r => r.as[String]))
 
   def fetchLargeTextFilestream: F[Stream[F, Chunk[Byte]]] =
-    for {
-      req <- F.pure(Request[F](Method.GET, ltUri))
-      res <- F.delay(client.streaming(req)(_.body.chunks))
-    } yield res
+    F.pure(client.streaming(Request[F](Method.GET, ltUri))(_.body.chunks))
 
   def largeTextStream: F[Stream[F, Byte]] =
     F.delay(
