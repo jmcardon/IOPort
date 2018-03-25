@@ -23,7 +23,7 @@ class Server[F[_]: Effect] extends StreamApp[F] {
       requestShutdown: F[Unit]): fs2.Stream[F, StreamApp.ExitCode] =
     for {
       client <- Http1Client.stream[F]()
-      ctx = new ApiModule[F]
+      ctx = new ApiModule[F](client)
       init <- BlazeBuilder[F]
         .bindHttp(8080, "localhost")
         .mountService(ctx.api)
