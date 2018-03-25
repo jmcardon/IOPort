@@ -16,6 +16,9 @@ final class LargeTextEndpoint[F[_]: Effect](ltService: LTextService[F])
     case GET -> Root / "largetext" =>
       ltService.largeTextStream >>= (Ok(_))
 
+    case GET -> Root / "largetext" / "stream" =>
+      ltService.fetchLargeTextFilestream >>= (Ok(_))
+      
     case req @ POST -> Root / "largetext" =>
       for {
         url <- req.as[Url]
