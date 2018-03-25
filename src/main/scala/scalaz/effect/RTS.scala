@@ -7,8 +7,8 @@ import scala.concurrent.duration.Duration
 
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
-import java.util.concurrent.{ Executors, TimeUnit }
-import java.lang.{ Runnable, Runtime }
+import java.util.concurrent.{Executors, TimeUnit}
+import java.lang.{Runnable, Runtime}
 
 /**
   * This trait provides a high-performance implementation of a runtime system for
@@ -29,8 +29,8 @@ trait RTS {
   final def tryUnsafePerformIO[A](io: IO[A]): Throwable \/ A = {
     // TODO: Optimize — this is slow and inefficient
     var result: Try[A] = null
-    lazy val lock      = new ReentrantLock()
-    lazy val done      = lock.newCondition()
+    lazy val lock = new ReentrantLock()
+    lazy val done = lock.newCondition()
 
     val context = new FiberContext[A](this, defaultHandler)
 
@@ -69,7 +69,8 @@ trait RTS {
   /**
     * The main thread pool used for executing fibers.
     */
-  val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors().max(2))
+  val threadPool = Executors.newFixedThreadPool(
+    Runtime.getRuntime().availableProcessors().max(2))
 
   /**
     * This determines the maximum number of resumptions placed on the stack
@@ -119,9 +120,9 @@ private object RTS {
 
   sealed trait RaceState
   object RaceState {
-    case object Started     extends RaceState
+    case object Started extends RaceState
     case object OtherFailed extends RaceState
-    case object Finished    extends RaceState
+    case object Finished extends RaceState
   }
 
   type Try[A] = Throwable \/ A
@@ -149,7 +150,8 @@ private object RTS {
     final def apply(v: Any): IO[Any] = IO.now(v)
   }
 
-  final case class Finalizer(finalizer: BracketResult[Any] => IO[Unit]) extends Function[Any, IO[Any]] {
+  final case class Finalizer(finalizer: BracketResult[Any] => IO[Unit])
+      extends Function[Any, IO[Any]] {
     final def apply(v: Any): IO[Any] = IO.now(v)
   }
 
@@ -157,7 +159,7 @@ private object RTS {
     type Cont = Any => IO[Any]
 
     private[this] var array = new Array[Cont](10)
-    private[this] var size  = 0
+    private[this] var size = 0
 
     final def peek(): Cont = array(size - 1)
 
@@ -191,22 +193,24 @@ private object RTS {
   /**
     * An implementation of Fiber that maintains context necessary for evaluation.
     */
-  final class FiberContext[A](rts: RTS, val unhandled: Throwable => IO[Unit]) extends Fiber[A] {
+  final class FiberContext[A](rts: RTS, val unhandled: Throwable => IO[Unit])
+      extends Fiber[A] {
     import FiberStatus._
-    import java.util.{ Collections, Set, WeakHashMap }
-    import rts.{ MaxResumptionDepth, YieldMaxOpCount }
+    import java.util.{Collections, Set, WeakHashMap}
+    import rts.{MaxResumptionDepth, YieldMaxOpCount}
 
     // Accessed from multiple threads:
-    private[this] val status = new AtomicReference[FiberStatus[A]](FiberStatus.Initial[A])
+    private[this] val status =
+      new AtomicReference[FiberStatus[A]](FiberStatus.Initial[A])
     //@volatile
     private[this] var killed = false
 
     // TODO: A lot can be pulled out of status to increase performance
 
     // Accessed from within a single thread (not necessarily the same):
-    private[this] var noInterrupt                            = 0
+    private[this] var noInterrupt = 0
     private[this] var supervised: List[Set[FiberContext[_]]] = Nil
-    private[this] var supervising                            = 0
+    private[this] var supervising = 0
 
     private[this] val stack: Stack = new Stack()
 
@@ -233,7 +237,7 @@ private object RTS {
       */
     final def catchException(err: Throwable): IO[List[Throwable]] = {
       var finalizer: IO[List[Throwable]] = null
-      var body: BracketResult[Any]       = null
+      var body: BracketResult[Any] = null
 
       var caught = false
 
@@ -245,10 +249,11 @@ private object RTS {
           case f: Finalizer =>
             if (body == null) body = BracketResult.Failed(err)
 
-            val currentFinalizer: IO[List[Throwable]] = f.finalizer(body).attempt.map {
-              case -\/(error) => error :: Nil
-              case _          => Nil
-            }
+            val currentFinalizer: IO[List[Throwable]] =
+              f.finalizer(body).attempt.map {
+                case -\/(error) => error :: Nil
+                case _          => Nil
+              }
 
             if (finalizer == null) finalizer = currentFinalizer
             else
@@ -337,8 +342,8 @@ private object RTS {
           val maxopcount = YieldMaxOpCount
 
           var result: Try[Any] = null
-          var eval: Boolean    = true
-          var opcount: Int     = 0
+          var eval: Boolean = true
+          var opcount: Int = 0
 
           do {
             // Check to see if the fiber should continue executing or not:
@@ -456,13 +461,14 @@ private object RTS {
                       } else {
                         // We have finalizers to run. We'll resume executing with the
                         // uncaught failure after we have executed all the finalizers:
-                        val reported  = dispatchErrors(finalizer)
+                        val reported = dispatchErrors(finalizer)
                         val completer = IO.fail[Any](error)
 
                         // Do not interrupt finalization:
                         this.noInterrupt += 1
 
-                        curIo = ensuringUninterruptibleExit(reported *> completer)
+                        curIo = ensuringUninterruptibleExit(
+                          reported *> completer)
                       }
                     } else {
                       val value: Try[Any] = -\/(error)
@@ -478,13 +484,14 @@ private object RTS {
                         }
                       } else {
                         // Must run finalizer first:
-                        val reported  = dispatchErrors(finalizer)
+                        val reported = dispatchErrors(finalizer)
                         val completer = IO.now[Any](value)
 
                         // Do not interrupt finalization:
                         this.noInterrupt += 1
 
-                        curIo = ensuringUninterruptibleExit(reported *> completer)
+                        curIo = ensuringUninterruptibleExit(
+                          reported *> completer)
                       }
                     }
 
@@ -544,7 +551,8 @@ private object RTS {
 
                     val optHandler = io.handler
 
-                    val handler = if (optHandler eq None) unhandled else optHandler.get
+                    val handler =
+                      if (optHandler eq None) unhandled else optHandler.get
 
                     val value: FiberContext[Any] = fork(io.value, handler)
 
@@ -573,7 +581,10 @@ private object RTS {
                     val ref = new AtomicReference[Any]()
 
                     val finalizer = Finalizer(
-                      rez => IO.suspend(if (ref.get != null) io.release(rez, ref.get) else IO.unit)
+                      rez =>
+                        IO.suspend(
+                          if (ref.get != null) io.release(rez, ref.get)
+                          else IO.unit)
                     )
 
                     stack.push(finalizer)
@@ -586,7 +597,8 @@ private object RTS {
                         _ <- IO.sync(ref.set(a))
                       } yield a).uninterruptibly
                       b <- io.use(a)
-                      _ <- (io.release(BracketResult.Completed(b), a) <* IO.sync(ref.set(null))).uninterruptibly
+                      _ <- (io.release(BracketResult.Completed(b), a) <* IO
+                        .sync(ref.set(null))).uninterruptibly
                     } yield b
 
                   case IO.Tags.Uninterruptible =>
@@ -603,7 +615,8 @@ private object RTS {
 
                     curIo = IO.AsyncEffect { callback =>
                       rts
-                        .schedule(callback(SuccessUnit.asInstanceOf[Try[Any]]), io.duration)
+                        .schedule(callback(SuccessUnit.asInstanceOf[Try[Any]]),
+                                  io.duration)
                         .asInstanceOf[AsyncReturn[Any]]
                     }
 
@@ -611,7 +624,7 @@ private object RTS {
                     val io = curIo.asInstanceOf[IO.Supervise[Any]]
 
                     curIo = enterSupervision *>
-                            io.value.ensuring(exitSupervision(io.error))
+                      io.value.ensuring(exitSupervision(io.error))
                 }
               }
             } else {
@@ -627,7 +640,7 @@ private object RTS {
                 result = -\/(t)
               } else {
                 // Must run finalizers first before failing:
-                val reported  = dispatchErrors(finalizer)
+                val reported = dispatchErrors(finalizer)
                 val completer = IO.fail[Any](t)
 
                 // Do not interrupt finalization:
@@ -659,9 +672,10 @@ private object RTS {
 
             val finalizer =
               if (finalizer0 == null) handled
-              else finalizer0.flatMap(first => handled.map(last => first ::: last))
+              else
+                finalizer0.flatMap(first => handled.map(last => first ::: last))
 
-            val reported  = dispatchErrors(finalizer)
+            val reported = dispatchErrors(finalizer)
             val completer = IO.fail[Any](t)
 
             // Do not interrupt finalization:
@@ -673,7 +687,8 @@ private object RTS {
       }
     }
 
-    final def fork[A](io: IO[A], handler: Throwable => IO[Unit]): FiberContext[A] = {
+    final def fork[A](io: IO[A],
+                      handler: Throwable => IO[Unit]): FiberContext[A] = {
       val context = new FiberContext[A](rts, handler)
 
       rts.submit(context.evaluate(io))
@@ -707,7 +722,7 @@ private object RTS {
             if (stack.isEmpty()) done(value.asInstanceOf[Try[A]])
             else continueWithValue(value, \/-(value))
           } else {
-            val reported  = dispatchErrors(finalizer)
+            val reported = dispatchErrors(finalizer)
             val completer = if (stack.isEmpty()) IO.fail(t) else IO.now(value)
 
             // Do not interrupt finalization:
@@ -733,61 +748,65 @@ private object RTS {
         } else resumeEvaluate(value)
       }
 
-    private final def raceWith[A, B, C](unhandled: Throwable => IO[Unit],
-      leftIO: IO[A],
-      rightIO: IO[B],
-      finish: (A, Fiber[B]) \/ (B, Fiber[A]) => IO[C]): IO[C] = {
+    private final def raceWith[A, B, C](
+        unhandled: Throwable => IO[Unit],
+        leftIO: IO[A],
+        rightIO: IO[B],
+        finish: (A, Fiber[B]) \/ (B, Fiber[A]) => IO[C]): IO[C] = {
       import RaceState._
 
-      val left  = fork(leftIO, unhandled)
+      val left = fork(leftIO, unhandled)
       val right = fork(rightIO, unhandled)
 
       // TODO: Interrupt raced fibers if parent is interrupted?
 
-      val leftWins  = (w: A, l: Fiber[B]) => finish(-\/((w, l)))
+      val leftWins = (w: A, l: Fiber[B]) => finish(-\/((w, l)))
       val rightWins = (w: B, l: Fiber[A]) => finish(\/-((w, l)))
 
       IO.flatten(IO.async0[IO[C]] { resume =>
         val state = new AtomicReference[RaceState](Started)
 
-        def callback[A1, B1](other: Fiber[B1], finish: (A1, Fiber[B1]) => IO[C]): Try[A1] => Unit = (tryA: Try[A1]) => {
-          var loop               = true
-          var action: () => Unit = null
+        def callback[A1, B1](
+            other: Fiber[B1],
+            finish: (A1, Fiber[B1]) => IO[C]): Try[A1] => Unit =
+          (tryA: Try[A1]) => {
+            var loop = true
+            var action: () => Unit = null
 
-          while (loop) {
-            val oldStatus = state.get
+            while (loop) {
+              val oldStatus = state.get
 
-            val newState = oldStatus match {
-              case Finished => oldStatus
-              case OtherFailed =>
-                tryA match {
-                  case -\/(error) =>
-                    action = () => {
-                      resume(-\/(error))
-                    }
-                    Finished
-                  case \/-(a) =>
-                    action = () => {
-                      resume(\/-(finish(a, other)))
-                    }
-                    Finished
-                }
-              case Started =>
-                tryA match {
-                  case -\/(_) => OtherFailed
-                  case \/-(a) =>
-                    action = () => {
-                      resume(\/-(finish(a, other)))
-                    }
-                    Finished
-                }
+              val newState = oldStatus match {
+                case Finished => oldStatus
+                case OtherFailed =>
+                  tryA match {
+                    case -\/(error) =>
+                      action = () => {
+                        resume(-\/(error))
+                      }
+                      Finished
+                    case \/-(a) =>
+                      action = () => {
+                        resume(\/-(finish(a, other)))
+                      }
+                      Finished
+                  }
+                case Started =>
+                  tryA match {
+                    case -\/(_) => OtherFailed
+                    case \/-(a) =>
+                      action = () => {
+                        resume(\/-(finish(a, other)))
+                      }
+                      Finished
+                  }
+              }
+
+              if (state.compareAndSet(oldStatus, newState)) loop = false
             }
 
-            if (state.compareAndSet(oldStatus, newState)) loop = false
+            if (action != null) action()
           }
-
-          if (action != null) action()
-        }
 
         var canceler: Throwable => Unit = null
 
@@ -830,7 +849,8 @@ private object RTS {
     final def enterSupervision: IO[Unit] = IO.sync {
       supervising += 1
 
-      def newWeakSet[A]: Set[A] = Collections.newSetFromMap[A](new WeakHashMap[A, java.lang.Boolean]())
+      def newWeakSet[A]: Set[A] =
+        Collections.newSetFromMap[A](new WeakHashMap[A, java.lang.Boolean]())
 
       val set = newWeakSet[FiberContext[_]]
 
@@ -856,14 +876,22 @@ private object RTS {
         case AsyncRegion(reentrancy, resume, cancel, joiners, killers) =>
           val newReentrancy = reentrancy + 1
 
-          if (!status.compareAndSet(oldStatus, AsyncRegion(newReentrancy, resume + 1, cancel, joiners, killers)))
+          if (!status.compareAndSet(oldStatus,
+                                    AsyncRegion(newReentrancy,
+                                                resume + 1,
+                                                cancel,
+                                                joiners,
+                                                killers)))
             enterAsyncStart()
           else newReentrancy
 
         case Executing(joiners, killers) =>
           val newReentrancy = 1
 
-          if (!status.compareAndSet(oldStatus, AsyncRegion(newReentrancy, 1, None, joiners, killers))) enterAsyncStart()
+          if (!status.compareAndSet(
+                oldStatus,
+                AsyncRegion(newReentrancy, 1, None, joiners, killers)))
+            enterAsyncStart()
           else newReentrancy
 
         case _ =>
@@ -885,10 +913,13 @@ private object RTS {
       oldStatus match {
         case AsyncRegion(1, 0, _, joiners, killers) =>
           // No more resumptions left and exiting last async boundary initiation:
-          if (!status.compareAndSet(oldStatus, Executing(joiners, killers))) enterAsyncEnd()
+          if (!status.compareAndSet(oldStatus, Executing(joiners, killers)))
+            enterAsyncEnd()
 
         case AsyncRegion(reentrancy, resume, cancel, joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, AsyncRegion(reentrancy - 1, resume, cancel, joiners, killers)))
+          if (!status.compareAndSet(
+                oldStatus,
+                AsyncRegion(reentrancy - 1, resume, cancel, joiners, killers)))
             enterAsyncEnd()
 
         case _ =>
@@ -900,8 +931,11 @@ private object RTS {
       val oldStatus = status.get
 
       oldStatus match {
-        case AsyncRegion(reentrancy, resume, _, joiners, killers) if (id == reentrancy) =>
-          if (!status.compareAndSet(oldStatus, AsyncRegion(reentrancy, resume, Some(c), joiners, killers)))
+        case AsyncRegion(reentrancy, resume, _, joiners, killers)
+            if (id == reentrancy) =>
+          if (!status.compareAndSet(
+                oldStatus,
+                AsyncRegion(reentrancy, resume, Some(c), joiners, killers)))
             awaitAsync(id, c)
 
         case _ =>
@@ -915,11 +949,14 @@ private object RTS {
       oldStatus match {
         case AsyncRegion(0, 1, _, joiners, killers) =>
           // No more resumptions are left!
-          if (!status.compareAndSet(oldStatus, Executing(joiners, killers))) resumeAsync()
+          if (!status.compareAndSet(oldStatus, Executing(joiners, killers)))
+            resumeAsync()
           else true
 
         case AsyncRegion(reentrancy, resume, _, joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, AsyncRegion(reentrancy, resume - 1, None, joiners, killers)))
+          if (!status.compareAndSet(
+                oldStatus,
+                AsyncRegion(reentrancy, resume - 1, None, joiners, killers)))
             resumeAsync()
           else true
 
@@ -995,21 +1032,27 @@ private object RTS {
     }
 
     @tailrec
-    private final def kill0(t: Throwable, cb: Callback[Unit]): AsyncReturn[Try[Unit]] = {
+    private final def kill0(t: Throwable,
+                            cb: Callback[Unit]): AsyncReturn[Try[Unit]] = {
       killed = true
 
       val oldStatus = status.get
 
       oldStatus match {
         case Executing(joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, Interrupting(t, joiners, cb :: killers))) kill0(t, cb)
+          if (!status.compareAndSet(oldStatus,
+                                    Interrupting(t, joiners, cb :: killers)))
+            kill0(t, cb)
           else AsyncReturn.later[Try[Unit]]
 
         case Interrupting(t, joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, Interrupting(t, joiners, cb :: killers))) kill0(t, cb)
+          if (!status.compareAndSet(oldStatus,
+                                    Interrupting(t, joiners, cb :: killers)))
+            kill0(t, cb)
           else AsyncReturn.later[Try[Unit]]
 
-        case AsyncRegion(_, resume, cancelOpt, joiners, killers) if (resume > 0 && noInterrupt == 0) =>
+        case AsyncRegion(_, resume, cancelOpt, joiners, killers)
+            if (resume > 0 && noInterrupt == 0) =>
           val v = -\/[Throwable, A](t)
 
           if (!status.compareAndSet(oldStatus, Done(v))) kill0(t, cb)
@@ -1020,7 +1063,10 @@ private object RTS {
               case None =>
               case Some(cancel) =>
                 try cancel(t)
-                catch { case t: Throwable if (nonFatal(t)) => /* TODO: Don't throw away? */ }
+                catch {
+                  case t: Throwable if (nonFatal(t)) =>
+                  /* TODO: Don't throw away? */
+                }
             }
 
             val finalizer = interruptStack(t)
@@ -1035,14 +1081,17 @@ private object RTS {
           }
 
         case AsyncRegion(_, _, _, joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, Interrupting(t, joiners, cb :: killers))) kill0(t, cb)
+          if (!status.compareAndSet(oldStatus,
+                                    Interrupting(t, joiners, cb :: killers)))
+            kill0(t, cb)
           else AsyncReturn.later[Try[Unit]]
 
         case Done(_) => AsyncReturn.now(SuccessUnit)
       }
     }
 
-    private final def kill1(t: Throwable, cb: Callback[Unit]): AsyncReturn[Unit] =
+    private final def kill1(t: Throwable,
+                            cb: Callback[Unit]): AsyncReturn[Unit] =
       mapExtract(kill0(t, cb))
 
     @tailrec
@@ -1051,30 +1100,41 @@ private object RTS {
 
       oldStatus match {
         case Executing(joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, Executing(cb :: joiners, killers))) join0(cb)
+          if (!status.compareAndSet(oldStatus,
+                                    Executing(cb :: joiners, killers)))
+            join0(cb)
           else AsyncReturn.later[Try[A]]
 
         case Interrupting(t, joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, Interrupting(t, cb :: joiners, killers))) join0(cb)
+          if (!status.compareAndSet(oldStatus,
+                                    Interrupting(t, cb :: joiners, killers)))
+            join0(cb)
           else AsyncReturn.later[Try[A]]
 
         case AsyncRegion(reenter, resume, cancel, joiners, killers) =>
-          if (!status.compareAndSet(oldStatus, AsyncRegion(reenter, resume, cancel, cb :: joiners, killers))) join0(cb)
+          if (!status.compareAndSet(
+                oldStatus,
+                AsyncRegion(reenter, resume, cancel, cb :: joiners, killers)))
+            join0(cb)
           else AsyncReturn.later[Try[A]]
 
         case Done(v) => AsyncReturn.now(v)
       }
     }
 
-    private final def join1(cb: Callback[A]): AsyncReturn[A] = mapExtract(join0(cb))
+    private final def join1(cb: Callback[A]): AsyncReturn[A] =
+      mapExtract(join0(cb))
 
-    private final def mapExtract[B](m: AsyncReturn[Try[B]]): AsyncReturn[B] = m match {
-      case AsyncReturn.Now(v)        => AsyncReturn.Now(extract(v))
-      case AsyncReturn.MaybeLater(c) => AsyncReturn.MaybeLater[B](c)
-      case _                         => AsyncReturn.later[B]
-    }
+    private final def mapExtract[B](m: AsyncReturn[Try[B]]): AsyncReturn[B] =
+      m match {
+        case AsyncReturn.Now(v)        => AsyncReturn.Now(extract(v))
+        case AsyncReturn.MaybeLater(c) => AsyncReturn.MaybeLater[B](c)
+        case _                         => AsyncReturn.later[B]
+      }
 
-    private def purgeJoinersKillers(v: Try[A], joiners: List[Callback[A]], killers: List[Callback[Unit]]): Unit = {
+    private def purgeJoinersKillers(v: Try[A],
+                                    joiners: List[Callback[A]],
+                                    killers: List[Callback[Unit]]): Unit = {
       // FIXME: Put all but one of these (first joiner?) on the thread pool.
       killers.reverse.foreach(_.apply(SuccessUnit))
       joiners.reverse.foreach(_.apply(v))
@@ -1083,20 +1143,24 @@ private object RTS {
 
   sealed trait FiberStatus[A]
   object FiberStatus {
-    final case class Executing[A](joiners: List[Callback[A]], killers: List[Callback[Unit]]) extends FiberStatus[A]
-    final case class Interrupting[A](error: Throwable, joiners: List[Callback[A]], killers: List[Callback[Unit]])
-      extends FiberStatus[A]
+    final case class Executing[A](joiners: List[Callback[A]],
+                                  killers: List[Callback[Unit]])
+        extends FiberStatus[A]
+    final case class Interrupting[A](error: Throwable,
+                                     joiners: List[Callback[A]],
+                                     killers: List[Callback[Unit]])
+        extends FiberStatus[A]
     final case class AsyncRegion[A](reentrancy: Int,
-      resume: Int,
-      cancel: Option[Throwable => Unit],
-      joiners: List[Callback[A]],
-      killers: List[Callback[Unit]])
-      extends FiberStatus[A]
+                                    resume: Int,
+                                    cancel: Option[Throwable => Unit],
+                                    joiners: List[Callback[A]],
+                                    killers: List[Callback[Unit]])
+        extends FiberStatus[A]
     final case class Done[A](value: Try[A]) extends FiberStatus[A]
 
     def Initial[A] = Executing[A](Nil, Nil)
   }
 
-  val SuccessUnit: Try[Unit]         = \/-(())
+  val SuccessUnit: Try[Unit] = \/-(())
   val NonCanceler: Throwable => Unit = (t: Throwable) => ()
 }
