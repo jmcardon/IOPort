@@ -16,4 +16,13 @@ package object effect {
     @inline def unapply[E, A](e: Left[E, A]): Option[E] = Left.unapply(e)
   }
 
+  implicit class FiberSyntax[A](val f: Fiber[A]) extends AnyVal {
+    def toCatsFiber: cats.effect.Fiber[IO, A] = new cats.effect.Fiber[IO, A] {
+      def cancel: IO[Unit] =
+        f.interruptIgnore(new Exception).catchAll(_ => IO.unit)
+
+      def join: IO[A] = f.join
+    }
+  }
+
 }
