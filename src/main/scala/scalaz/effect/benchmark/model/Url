@@ -1,3 +1,0 @@
-package scalaz.effect.benchmark.model
-
-final class Url(url: String) extends AnyVal

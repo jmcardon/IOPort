@@ -20,7 +20,7 @@ final class LargeTextEndpoint[F[_]: Effect](ltService: LTextService[F]) extends 
       case req @ POST -> Root / "largetext" => 
         for {
           url <- req.as[Url]
-          text <- ltService.fetchLargeTextFile(url.url) >>= (s => Effect[F].pure(s take 50))
+          text <- ltService.fetchLargeTextFile(url.url) map (_ take 1000)
           r <- Ok(text)
         } yield r
     }
