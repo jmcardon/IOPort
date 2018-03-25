@@ -26,3 +26,4 @@ class Server[F[_]: Effect] extends StreamApp[F] {
       } yield init
 
 }
+
