@@ -1,8 +1,10 @@
-val http4sVersion = "0.18.3"
+val http4sVersion = "0.18.4"
 val circeVersion = "0.9.2"
 val catsEffectVersion = "0.10"
 val catsVersion = "1.1.0"
-val monixVersion = "3.0.0-M3"
+val monixVersion = "3.0.0-RC1"
+val gatlingVersion = "2.3.0"
+val logbackV = "1.2.3"
 
 lazy val root = (project in file("."))
   .settings(
@@ -25,7 +27,9 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-literal" % circeVersion,
       "io.monix" %% "monix" % monixVersion,
-      "ch.qos.logback" % "logback-classic" % "1.2.3"
+      "ch.qos.logback" % "logback-classic" % logbackV,
+      "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % "test",
+      "io.gatling" % "gatling-test-framework" % gatlingVersion % "test"
     ),
     scalacOptions := Seq(
       "-unchecked",
@@ -42,3 +46,4 @@ lazy val root = (project in file("."))
       "-language:implicitConversions"
     )
   )
+  .enablePlugins(GatlingPlugin)

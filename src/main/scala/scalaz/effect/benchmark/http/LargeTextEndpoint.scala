@@ -3,7 +3,8 @@ package scalaz.effect.benchmark.http
 import cats.implicits._
 import cats.Monad
 import cats.effect.Effect
-import org.http4s.HttpService
+import fs2._
+import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import scalaz.effect.benchmark.service.LTextService
 import scalaz.effect.benchmark.model.Url

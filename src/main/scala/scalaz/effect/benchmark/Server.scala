@@ -9,9 +9,11 @@ import scalaz.effect.benchmark.module.ApiModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Main extends Server[IO]
+object Main extends Server[IO](8081)
 
-class Server[F[_]: Effect] extends StreamApp[F] {
+object CatsMain extends Server[cats.effect.IO](8080)
+
+class Server[F[_]: Effect](port: Int) extends StreamApp[F] {
 
   override def stream(
       args: List[String],
@@ -20,7 +22,7 @@ class Server[F[_]: Effect] extends StreamApp[F] {
       client <- Http1Client.stream[F]()
       ctx = new ApiModule[F]
       init <- BlazeBuilder[F]
-        .bindHttp(8080, "localhost")
+        .bindHttp(port, "localhost")
         .mountService(ctx.api)
         .serve
     } yield init
