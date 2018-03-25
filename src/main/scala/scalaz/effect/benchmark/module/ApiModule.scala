@@ -2,7 +2,11 @@ package scalaz.effect.benchmark.module
 
 import cats.effect.Effect
 import org.http4s.HttpService
-import scalaz.effect.benchmark.http.{JsonEndpoint, LargeTextEndpoint, ShortTextEndpoint}
+import scalaz.effect.benchmark.http.{
+  JsonEndpoint,
+  LargeTextEndpoint,
+  ShortTextEndpoint
+}
 import cats.syntax.semigroupk._
 import scalaz.effect.benchmark.service.LTextService
 

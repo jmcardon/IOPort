@@ -1,6 +1,3 @@
-
-
-
 val http4sVersion = "0.18.3"
 val circeVersion = "0.9.2"
 val catsEffectVersion = "0.10"
@@ -27,7 +24,8 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-literal" % circeVersion,
-      "io.monix" %% "monix" % monixVersion
+      "io.monix" %% "monix" % monixVersion,
+      "ch.qos.logback" % "logback-classic" % "1.2.3"
     ),
     scalacOptions := Seq(
       "-unchecked",

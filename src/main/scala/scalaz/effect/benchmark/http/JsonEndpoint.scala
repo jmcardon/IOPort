@@ -13,6 +13,4 @@ final class JsonEndpoint[F[_]: Effect] extends Http4sDsl[F] {
         Ok("Hello, Json!")
     }
 
-  
-
 }

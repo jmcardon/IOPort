@@ -1,6 +1,5 @@
 package scalaz.effect.benchmark
 
-
 import cats.effect.Effect
 import io.circe.generic.auto._
 import org.http4s._
@@ -12,4 +11,3 @@ package object implicits {
   implicit def urlEncoder[F[_]: Effect]: EntityDecoder[F, Url] =
     jsonOf[F, Url]
 }
-

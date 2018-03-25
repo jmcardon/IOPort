@@ -8,12 +8,15 @@ trait IOInstances extends RTS {
     def runAsync[A](fa: IO[A])(
         cb: Either[Throwable, A] => CatsIO[Unit]): CatsIO[Unit] = {
       CatsIO {
-        unsafePerformIO(fa.attempt.flatMap[Unit] { r =>
-          IO.async { innerCb =>
-            val p = cb(r).unsafeRunAsync(_ => ())
-            innerCb(\/-(p))
-          }
-        }.fork)
+        unsafePerformIO(
+          fa.attempt
+            .flatMap[Unit] { r =>
+              IO.async { innerCb =>
+                val p = cb(r).unsafeRunAsync(_ => ())
+                innerCb(\/-(p))
+              }
+            }
+            .fork)
       }
     }
 
