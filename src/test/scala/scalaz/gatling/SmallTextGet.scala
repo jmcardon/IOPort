@@ -8,10 +8,10 @@ import scala.concurrent.duration._
 import scalaz.effect.benchmark.model.Url
 
 abstract class SmallTextGet(url: Url, atOnce: Int, constant: Int, ramp: Int)
-    extends AbstractLoadTest(url, "/shorttext/hi", atOnce, constant, ramp)
+    extends AbstractLoadTest(url, "/shorttext", atOnce, constant, ramp)
 
 object SmallTextGetEndpoint {
   val Endpoint = ""
 }
 
-class StreamSmallText extends SmallTextGet(Url("http://34.210.26.184:8080/shorttext"), 1000, 1000, 1000)
+class StreamSmallText extends SmallTextGet(Url("http://34.210.26.184:8080"), 1000, 1000, 1000)
