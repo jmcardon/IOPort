@@ -25,7 +25,7 @@ class Server[F[_]: Effect] extends StreamApp[F] {
       client <- Http1Client.stream[F]()
       ctx = new ApiModule[F](client)
       init <- BlazeBuilder[F]
-        .bindHttp(8080, "localhost")
+        .bindHttp(8080, "0.0.0.0")
         .mountService(ctx.api)
         .serve
     } yield init

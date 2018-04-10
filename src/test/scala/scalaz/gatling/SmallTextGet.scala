@@ -9,3 +9,9 @@ import scalaz.effect.benchmark.model.Url
 
 abstract class SmallTextGet(url: Url, atOnce: Int, constant: Int, ramp: Int)
     extends AbstractLoadTest(url, "/shorttext/hi", atOnce, constant, ramp)
+
+object SmallTextGetEndpoint {
+  val Endpoint = ""
+}
+
+class StreamSmallText extends SmallTextGet(Url("http://34.210.26.184:8080/shorttext"), 1000, 1000, 1000)
