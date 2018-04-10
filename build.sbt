@@ -1,5 +1,5 @@
-val http4sVersion = "0.18.4"
-val circeVersion = "0.9.2"
+val http4sVersion = "0.19.0-HttpApp-SNAPSHOT"
+val circeVersion = "0.9.3"
 val catsEffectVersion = "0.10"
 val catsVersion = "1.1.0"
 val monixVersion = "3.0.0-RC1"
@@ -12,6 +12,7 @@ lazy val root = (project in file("."))
     name := "ioport",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "2.12.4",
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.typelevel" %% "cats-core" % catsVersion,
