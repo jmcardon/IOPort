@@ -30,7 +30,7 @@ lazy val root = (project in file("."))
       "io.monix" %% "monix" % monixVersion,
       "ch.qos.logback" % "logback-classic" % logbackV,
       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % "test",
-      "io.gatling" % "gatling-test-framework" % gatlingVersion % "test"
+      "io.gatling" % "gatling-test-framework" % gatlingVersion % "test",
     ),
     scalacOptions := Seq(
       "-unchecked",
@@ -45,6 +45,8 @@ lazy val root = (project in file("."))
       "-Ypartial-unification",
       "-language:higherKinds",
       "-language:implicitConversions"
-    )
+    ),
+    test in assembly := {},
+    mainClass in assembly := Some("com.example.CIOServer")
   )
   .enablePlugins(GatlingPlugin)
