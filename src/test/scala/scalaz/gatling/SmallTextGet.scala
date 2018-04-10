@@ -14,4 +14,4 @@ object SmallTextGetEndpoint {
   val Endpoint = ""
 }
 
-class StreamSmallText extends SmallTextGet(Url("http://54.202.17.68:8080"), 10000, 10000, 10000)
+class StreamSmallText extends SmallTextGet(Url("http://54.202.17.68:8080"), 50000, 50000, 50000)
