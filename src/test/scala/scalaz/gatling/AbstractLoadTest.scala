@@ -24,14 +24,10 @@ abstract class AbstractLoadTest(baseUrl: Url,
     .shareConnections
 
   val scn = scenario(s"Hitting $baseUrl$route")
-    .exec(
-      http("request_1")
-        .get(route))
+    .during(5.minutes) {
+      exec(http("request_1").get(route))
+    }
 
-  setUp(
-    scn.inject(
-//      atOnceUsers(atOnce))
-      constantUsersPerSec(constant).during(60.seconds))
-//               rampUsers(ramp).over(10.seconds))
-  ).protocols(httpConf)
+  setUp(scn.inject(atOnceUsers(16384)))
+    .protocols(httpConf)
 }
