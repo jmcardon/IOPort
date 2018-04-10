@@ -31,7 +31,7 @@ abstract class AbstractLoadTest(baseUrl: Url,
   setUp(
     scn.inject(
 //      atOnceUsers(atOnce))
-      constantUsersPerSec(constant).during(10.seconds))
+      constantUsersPerSec(constant).during(60.seconds))
 //               rampUsers(ramp).over(10.seconds))
   ).protocols(httpConf)
 }
