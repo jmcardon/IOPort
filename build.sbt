@@ -47,6 +47,6 @@ lazy val root = (project in file("."))
       "-language:implicitConversions"
     ),
     test in assembly := {},
-    mainClass in assembly := Some("com.example.CIOServer")
+    mainClass in assembly := Some("scalaz.effect.benchmark.CIOServer")
   )
   .enablePlugins(GatlingPlugin)
