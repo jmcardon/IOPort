@@ -27,5 +27,5 @@ class ApiModule[F[_]: Effect](client: Client[F]) {
     new ShortTextEndpoint[F].service
 
   val api: HttpService[F] =
-    jsonEndpoint <+> largeTextEndpoint <+> shortTextEndpoint
+    shortTextEndpoint <+>  jsonEndpoint <+> largeTextEndpoint
 }
