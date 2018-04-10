@@ -28,8 +28,9 @@ abstract class AbstractLoadTest(baseUrl: Url,
         .get(route))
 
   setUp(
-    scn.inject(atOnceUsers(atOnce),
-               constantUsersPerSec(constant).during(10.seconds),
-               rampUsers(ramp).over(10.seconds))
+    scn.inject(
+//      atOnceUsers(atOnce))
+      constantUsersPerSec(constant).during(10.seconds))
+//               rampUsers(ramp).over(10.seconds))
   ).protocols(httpConf)
 }
