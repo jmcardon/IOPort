@@ -9,7 +9,7 @@ final class ShortTextEndpoint[F[_]: Effect] extends Http4sDsl[F] {
 
   def service(implicit F: Monad[F]): HttpService[F] =
     HttpService[F] {
-      case GET -> Root / "shorttext" / url =>
+      case GET -> Root / "shorttext" =>
         Ok("Hello, shortstuff!")
     }
 
