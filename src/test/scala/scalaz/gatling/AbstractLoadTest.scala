@@ -21,6 +21,7 @@ abstract class AbstractLoadTest(baseUrl: Url,
     .acceptEncodingHeader("gzip, deflate")
     .contentTypeHeader("text/plain")
     .userAgentHeader("Mozilla/5.0 (Windows NT 5.1; rv:31.0) ScalaBench Ayy")
+    .shareConnections
 
   val scn = scenario(s"Hitting $baseUrl$route")
     .exec(
